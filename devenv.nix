@@ -1,11 +1,13 @@
-{ pkgs, ... }:
-
-{
+{pkgs, ...}: {
   # https://devenv.sh/basics/
   env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = [ pkgs.git ];
+  packages = [
+    pkgs.git
+    pkgs.nodePackages.pyright
+    pkgs.ruff
+  ];
 
   # https://devenv.sh/scripts/
   scripts.hello.exec = "echo hello from $GREET";
@@ -18,7 +20,7 @@
   # https://devenv.sh/languages/
   # languages.nix.enable = true;
   #
-  languages.python = { 
+  languages.python = {
     enable = true;
     poetry.enable = true;
   };
