@@ -1,3 +1,4 @@
+from email.policy import default
 import subprocess
 from pathlib import Path
 from time import sleep
@@ -5,7 +6,7 @@ from typing import NewType, Optional, Type, TypeVar
 
 import click
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from rich.console import Console
 from typing_extensions import Self
 from xdg_base_dirs import xdg_config_home
@@ -37,21 +38,42 @@ class ProxyHost(BaseModel):
 
 T = TypeVar("T", Host, ProxyHost)
 
+S = TypeVar("S")
+
+# recursive dict type
+RecDict = dict[str, S | dict[str, "RecDict[S]"]]
+
 
 class CNCConfig(BaseModel):
-    default_host: HostKey
+    default_host: Optional[HostKey] = None
     hosts: dict[HostKey, Host]
     proxy_hosts: dict[HostKey, ProxyHost]
 
     @classmethod
-    def from_dict(cls, config_dict: dict) -> Self:
-        def _parse_host(host_type: Type[T], host_dict: dict) -> dict[HostKey, T]:
-            return {k: host_type(name=k, **v) for k, v in host_dict.items()}
+    def from_dict(cls, config_dict: dict[str, RecDict[str]]) -> Self:
+        def _parse_host(
+            host_type: Type[T], host_dict: RecDict[str]
+        ) -> dict[HostKey, T]:
+            parsed_dict: dict[HostKey, T] = {}
+            for k, v in host_dict.items():
+                hostkey = HostKey(k)
+                if isinstance(v, dict):
+                    parsed_dict[hostkey] = host_type.parse_obj({"name": hostkey, **v})
+                else:
+                    raise ValueError(f"Invalid host configuration: {k}")
+            return parsed_dict
 
         hosts = _parse_host(Host, config_dict["hosts"])
         proxy_hosts = _parse_host(ProxyHost, config_dict["proxy_hosts"])
+        default_host = config_dict.get("default_host", "")
+        if isinstance(default_host, str):
+            default_host = HostKey(default_host)
+        else:
+            raise ValueError(
+                f"Invalid default host configuration, expected name of host, got {default_host}"
+            )
         return cls(
-            default_host=config_dict["default_host"],
+            default_host=HostKey(default_host),
             hosts=hosts,
             proxy_hosts=proxy_hosts,
         )
@@ -108,6 +130,7 @@ def send_wake_on_lan(host: Host, proxy: ProxyHost):
 )
 @click.option("--print-config", is_flag=True, help="Print the configuration")
 @click.option("-h", "--host", help="Host to connect to")
+@click.argument("host", required=False)
 def cli(list: bool, schema: bool, config_file: str, host: str, print_config: bool):
     config = load_configuration(Path(config_file))
     if schema:
@@ -124,21 +147,17 @@ def cli(list: bool, schema: bool, config_file: str, host: str, print_config: boo
 
 
 def main(config: CNCConfig, hostname: Optional[str] = None):
-    proxy = config.proxy_hosts[config.hosts[config.default_host].proxy]
-    hostname = HostKey(hostname) if hostname else config.default_host
+    hostname = HostKey(hostname or (config.default_host or ""))
     host = config.hosts.get(hostname)
     selected_host = host or select_highpower_host(config.hosts)
+    proxy = config.proxy_hosts[config.hosts[selected_host.name].proxy]
 
     if not is_host_online(selected_host, proxy):
-        console.print(
-            f"Waking up [bold]{selected_host.name}[/bold]...", style="green"
-        )
+        console.print(f"Waking up [bold]{selected_host.name}[/bold]...", style="green")
         send_wake_on_lan(selected_host, proxy)
         sleep(5)
 
-    console.print(
-        f"Connecting to [bold]{selected_host.name}[/bold]...", style="green"
-    )
+    console.print(f"Connecting to [bold]{selected_host.name}[/bold]...", style="green")
     subprocess.run(["ssh", selected_host.name], check=True)
 
 
