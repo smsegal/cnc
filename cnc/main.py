@@ -1,4 +1,3 @@
-from email.policy import default
 import subprocess
 from pathlib import Path
 from time import sleep
@@ -6,15 +5,16 @@ from typing import NewType, Optional, Type, TypeVar
 
 import click
 import yaml
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from rich.console import Console
 from typing_extensions import Self
-from xdg_base_dirs import xdg_config_home
 
 console = Console()
 
-CONFIG_DIR = xdg_config_home() / "cnc"
+CONFIG_DIR = Path.home() / ".config/cnc"
 CONFIG_FILE = CONFIG_DIR / "config.yml"
+
+CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
 
 HostKey = NewType("HostKey", str)
