@@ -50,7 +50,7 @@ class CNCConfig(BaseModel):
     proxy_hosts: dict[HostKey, ProxyHost]
 
     @classmethod
-    def from_dict(cls, config_dict: dict[str, RecDict[str]]) -> Self:
+    def from_dict(cls, config_dict: RecDict[str]) -> Self:
         def _parse_host(
             host_type: Type[T], host_dict: RecDict[str]
         ) -> dict[HostKey, T]:
