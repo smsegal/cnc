@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.05";
     devenv.url = "github:cachix/devenv";
     flake-utils.url = "github:numtide/flake-utils";
     poetry2nix.url = "github:nix-community/poetry2nix";
@@ -14,6 +14,15 @@
         python310 = pkgs.python310;
       in
       {
+        checks = {
+          pre-commit-check = pkgs.writeShellApplication {
+            name = "pre-commit-check";
+            runtimeInputs = [ pkgs.pre-commit ];
+            text = ''
+              pre-commit run --all-files ${./.}
+            '';
+          };
+        };
         packages = {
           cnc = mkPoetryApplication {
             projectDir = ./.;
@@ -30,6 +39,7 @@
                 pkgs.git
                 pkgs.nodePackages.pyright
                 pkgs.ruff
+                pkgs.pre-commit
               ];
 
               languages.python = {
@@ -37,6 +47,7 @@
                 poetry.enable = true;
                 package = python310;
               };
+
             })
           ];
         };
