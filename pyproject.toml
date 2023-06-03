@@ -34,3 +34,7 @@ line-length = 92
 
 [tool.black]
 line-length = 88
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
