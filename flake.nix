@@ -11,7 +11,7 @@
       let
         inherit (poetry2nix.legacyPackages.${system}) mkPoetryApplication;
         pkgs = nixpkgs.legacyPackages.${system};
-        python310 = pkgs.python310Full;
+        python310 = pkgs.python310;
       in
       {
         packages = {

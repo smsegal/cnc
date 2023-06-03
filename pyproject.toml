@@ -18,6 +18,10 @@ ipython = "^8.13.2"
 ipykernel = "^6.23.1"
 typing-extensions = "^4.5.0"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^7.3.1"
+hypothesis = "^6.75.7"
+
 [tool.poetry.scripts]
 cnc = "cnc.main:cli"
 
