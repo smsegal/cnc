@@ -14,15 +14,6 @@
         python310 = pkgs.python310;
       in
       {
-        checks = {
-          pre-commit-check = pkgs.writeShellApplication {
-            name = "pre-commit-check";
-            runtimeInputs = [ pkgs.pre-commit ];
-            text = ''
-              pre-commit run --all-files ${./.}
-            '';
-          };
-        };
         packages = {
           cnc = mkPoetryApplication {
             projectDir = ./.;
@@ -40,6 +31,7 @@
                 pkgs.nodePackages.pyright
                 pkgs.ruff
                 pkgs.pre-commit
+                pkgs.act
               ];
 
               languages.python = {
@@ -47,7 +39,6 @@
                 poetry.enable = true;
                 package = python310;
               };
-
             })
           ];
         };
