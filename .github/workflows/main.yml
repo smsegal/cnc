@@ -16,7 +16,8 @@ jobs:
             name: smsegal
             authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
             extraPullNames: nix-community
-      - run: nix build --impure
-      - run: nix develop --impure --command |
-          pre-commit run --all-files
+      - run: nix build
+      - run: >
+            nix develop --impure --command -- \
+            pre-commit run --all-files
       - run: nix develop --impure --command pytest
