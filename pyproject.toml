@@ -18,9 +18,23 @@ ipython = "^8.13.2"
 ipykernel = "^6.23.1"
 typing-extensions = "^4.6.3"
 
+[tool.poetry.group.test.dependencies]
+pytest = "^7.3.1"
+hypothesis = "^6.75.7"
+
 [tool.poetry.scripts]
 cnc = "cnc.main:cli"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 92
+
+[tool.black]
+line-length = 88
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

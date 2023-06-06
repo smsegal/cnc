@@ -1,13 +1,14 @@
 import subprocess
 from pathlib import Path
 from time import sleep
-from typing import NewType, Optional, Type, TypeVar
-
+from typing import Any, NewType, Optional, TypeVar, TypedDict
+from typing_extensions import NotRequired
 import click
 import yaml
-from pydantic import BaseModel
+from pydantic import BaseModel, parse_obj_as, validator
 from rich.console import Console
 from typing_extensions import Self
+
 
 console = Console()
 
@@ -16,66 +17,75 @@ CONFIG_FILE = CONFIG_DIR / "config.yml"
 
 CONFIG_DIR.mkdir(parents=True, exist_ok=True)
 
-
 HostKey = NewType("HostKey", str)
 
 
-class Host(BaseModel):
+class BaseHost(BaseModel):
     name: HostKey
     ip: Optional[str]
-    mac: str
     user: Optional[str]
     port: int = 22
+
+
+class Host(BaseHost):
+    mac: str
     proxy: HostKey
 
 
-class ProxyHost(BaseModel):
-    name: HostKey
-    ip: Optional[str]
-    user: Optional[str]
-    port: int = 22
+class ProxyHost(BaseHost):
+    ...
 
 
 T = TypeVar("T", Host, ProxyHost)
 
 S = TypeVar("S")
 
-# recursive dict type
-RecDict = dict[str, S | dict[str, "RecDict[S]"]]
+
+class ConfigDict(TypedDict):
+    hosts: list[dict[str, str | int]]
+    proxy_hosts: list[dict[str, str | int]]
+    default_host: NotRequired[str]
 
 
 class CNCConfig(BaseModel):
-    default_host: Optional[HostKey] = None
-    hosts: dict[HostKey, Host]
     proxy_hosts: dict[HostKey, ProxyHost]
+    hosts: dict[HostKey, Host]
+    default_host: Optional[HostKey] = None
+
+    @validator("default_host")
+    def default_host_exists(
+        cls, default_host: Optional[HostKey], values: dict[str, Any]
+    ):
+        print(values)
+        if default_host and default_host not in values["hosts"]:
+            raise ValueError(f"Default host {default_host} not found in hosts list.")
+        return default_host
+
+    @validator("hosts")
+    def hosts_have_valid_proxies(
+        cls, hosts: dict[HostKey, Host], values: dict[str, Any]
+    ):
+        for hostname, host in hosts.items():
+            if host.proxy not in values["proxy_hosts"]:
+                raise ValueError(
+                    f"Proxy host {host.proxy} for Host {hostname} not found in proxy hosts."
+                )
+        return hosts
 
     @classmethod
-    def from_dict(cls, config_dict: RecDict[str]) -> Self:
-        def _parse_host(
-            host_type: Type[T], host_dict: RecDict[str]
-        ) -> dict[HostKey, T]:
-            parsed_dict: dict[HostKey, T] = {}
-            for k, v in host_dict.items():
-                hostkey = HostKey(k)
-                if isinstance(v, dict):
-                    parsed_dict[hostkey] = host_type.parse_obj({"name": hostkey, **v})
-                else:
-                    raise ValueError(f"Invalid host configuration: {k}")
-            return parsed_dict
-
-        hosts = _parse_host(Host, config_dict["hosts"])
-        proxy_hosts = _parse_host(ProxyHost, config_dict["proxy_hosts"])
-        default_host = config_dict.get("default_host", "")
-        if isinstance(default_host, str):
-            default_host = HostKey(default_host)
-        else:
-            raise ValueError(
-                f"Invalid default host configuration, expected name of host, got {default_host}"
-            )
-        return cls(
-            default_host=HostKey(default_host),
-            hosts=hosts,
-            proxy_hosts=proxy_hosts,
+    def from_dict(cls, config_dict: ConfigDict) -> Self:
+        return parse_obj_as(
+            cls,
+            {
+                "hosts": {
+                    host["name"]: Host.parse_obj(host) for host in config_dict["hosts"]
+                },
+                "proxy_hosts": {
+                    host["name"]: ProxyHost.parse_obj(host)
+                    for host in config_dict["proxy_hosts"]
+                },
+                "default_host": config_dict.get("default_host"),
+            },
         )
 
 
@@ -159,7 +169,3 @@ def main(config: CNCConfig, hostname: Optional[str] = None):
 
     console.print(f"Connecting to [bold]{selected_host.name}[/bold]...", style="green")
     subprocess.run(["ssh", selected_host.name], check=True)
-
-
-if __name__ == "__main__":
-    cli()
