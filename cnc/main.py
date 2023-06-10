@@ -56,7 +56,6 @@ class CNCConfig(BaseModel):
     def default_host_exists(
         cls, default_host: Optional[HostKey], values: dict[str, Any]
     ):
-        print(values)
         if default_host and default_host not in values["hosts"]:
             raise ValueError(f"Default host {default_host} not found in hosts list.")
         return default_host
