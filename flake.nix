@@ -32,8 +32,6 @@
                 pkgs.ruff
                 pkgs.pre-commit
                 pkgs.act
-                pkgs.pre-commit
-                pkgs.act
               ];
 
               languages.python = {
