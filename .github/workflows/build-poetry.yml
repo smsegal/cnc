@@ -43,3 +43,13 @@ jobs:
       - name: Run pytest
         run: |
           poetry run pytest
+
+      - name: Build wheel
+        run: |
+          poetry build --format wheel
+
+      - name: Publish artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheel
+          path: dist/*.whl
