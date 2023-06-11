@@ -10,3 +10,6 @@ CNC gets around this by making one assumption about your local network topology.
 There must exist an always-on host on the same network as the big power-hungry host that is accesible from the internet.
 This host is connected to first, and then sends the magic packet.
 At this point, we wait for the sleeping host to wake up, and then connect to it via SSH.
+
+## About
+This is an overengineered shell script basically. Using it as a playground for experimenting with github actions, various python libraries, etc. Intended for my personal use.
