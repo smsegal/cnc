@@ -1,8 +1,11 @@
 name: Python CI
 
 on:
+  workflow_call:
   pull_request:
   push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -43,3 +46,4 @@ jobs:
       - name: Run pytest
         run: |
           poetry run pytest
+
