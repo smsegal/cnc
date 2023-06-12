@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  call-ci:
+    uses: ./.github/workflows/python-ci.yml
+
+  bump-version:
+    needs: call-ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v3
+        with:
+          python-version: 3.10
+      - name: Bump version
+        run: |
+          poetry install --group=release # installs dunamai for versioning
+          poetry version $(dunamai from git)
+
+      - name: Build wheel
+        run: |
+          poetry build --format wheel
+
+      - name: Publish artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheel
+          path: dist/*.whl

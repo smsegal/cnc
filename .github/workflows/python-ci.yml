@@ -1,8 +1,11 @@
 name: Python CI
 
 on:
+  workflow_call:
   pull_request:
   push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -44,12 +47,3 @@ jobs:
         run: |
           poetry run pytest
 
-      - name: Build wheel
-        run: |
-          poetry build --format wheel
-
-      - name: Publish artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheel
-          path: dist/*.whl

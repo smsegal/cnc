@@ -1,9 +1,12 @@
 [tool.poetry]
 name = "cnc"
-version = "0.1.0"
+version = "0.2.1"
 description = "connect to remote servers, but wake em up first"
 authors = ["Shane Segal <shane@smsegal.ca>"]
 readme = "README.md"
+
+[tool.poetry-dynamic-versioning]
+enable = true
 
 [tool.poetry.dependencies]
 python = ">=3.9.0,<3.12.0"
@@ -22,6 +25,10 @@ pyright = "^1.1.313"
 [tool.poetry.group.test.dependencies]
 pytest = "^7.3.1"
 hypothesis = "^6.78.0"
+
+
+[tool.poetry.group.release.dependencies]
+dunamai = "^1.17.0"
 
 [tool.poetry.scripts]
 cnc = "cnc.main:cli"
