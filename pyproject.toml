@@ -24,7 +24,7 @@ pyright = "^1.1.313"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^7.3.1"
-hypothesis = "^6.78.1"
+hypothesis = "^6.80.0"
 
 
 [tool.poetry.group.release.dependencies]
