@@ -19,6 +19,7 @@
             projectDir = ./.;
             python = python310;
             preferWheel = true;
+            extras = [];
           };
           default = self.packages.${system}.cnc;
         };
