@@ -823,13 +823,13 @@ plugins = ["importlib-metadata"]
 
 [[package]]
 name = "pyright"
-version = "1.1.313"
+version = "1.1.317"
 description = "Command line wrapper for pyright"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pyright-1.1.313-py3-none-any.whl", hash = "sha256:1aeed72d5563e97461cb9d17847bfa918f7ec0cf79912bb3d2432fbe014daa23"},
-    {file = "pyright-1.1.313.tar.gz", hash = "sha256:95fa963337e2cfd4900601197d0f866d8c51732dea6c0bb12f962f92a79c77e3"},
+    {file = "pyright-1.1.317-py3-none-any.whl", hash = "sha256:9cf24f83fe8f2cf00773068e06ce771f03331590c7d5e771546f81d7f60efaba"},
+    {file = "pyright-1.1.317.tar.gz", hash = "sha256:74da4d3e2dcfe66a2d1d1001e16431ec17aac0ad35b03c0410f7379c2cb5c7f0"},
 ]
 
 [package.dependencies]
@@ -1197,4 +1197,4 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9.0,<3.12.0"
-content-hash = "0dcd5b9e61b6e60ae83f938d45edc1b2e51fa019ca43a887ea838a46bfaecb14"
+content-hash = "24ebb6731d14d2da47e0c4fd8bbb311e0e01e59d245e1c0c91ae3c3d6f92af1c"
